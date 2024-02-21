@@ -3,13 +3,13 @@
 import numpy
 import shlex
 import xpsi
-from xpsi.Parameter import Derive
+# from xpsi.Parameter import Derive
 from xpsi.global_imports import gravradius
 
 from .utils import (CustomInstrument, CustomSignal, CustomInterstellar,
                     CustomPhotosphere)
 
-from pycbc.workflow import WorkflowConfigParser
+# from pycbc.workflow import WorkflowConfigParser
 from pycbc.inference.models import BaseModel
 
 
@@ -49,7 +49,7 @@ class XPSIModel(BaseModel):
 
     def _loglikelihood(self):
         # map the current parameters to the ordered list
-        params = self.current_params
+        # params = self.current_params
         # update the underlying likelihood. Don't need for now, no param
         # aliases.
         """for p in self._xpsi_likelihood.names:
@@ -288,15 +288,15 @@ def hotregions_from_config(cp):
     # NEED TO PULL HOTREGION PRIORS FROM PRIOR
     hotspots_bounds = {
         'p': dict(
-            super_colatitude = (0.001, numpy.pi-0.001),
-            super_radius = (0.001, numpy.pi/2.0 - 0.001),
-            phase_shift = (-0.25, 0.75),  # NOTE - changed from -0.5, 0.5. why?
-            super_temperature = (5.1, 6.8)),
+            super_colatitude=(0.001, numpy.pi-0.001),
+            super_radius=(0.001, numpy.pi/2.0 - 0.001),
+            phase_shift=(-0.25, 0.75),  # NOTE - changed from -0.5, 0.5. why?
+            super_temperature=(5.1, 6.8)),
         's': dict(
-            super_colatitude = (0.001, numpy.pi - 0.001),
-            super_radius = (0.001, numpy.pi/2.0 - 0.001),
-            phase_shift = (-0.5, 0.5),
-            super_temperature = (5.1, 6.8)
+            super_colatitude=(0.001, numpy.pi - 0.001),
+            super_radius=(0.001, numpy.pi/2.0 - 0.001),
+            phase_shift=(-0.5, 0.5),
+            super_temperature=(5.1, 6.8)
         )
     }
     # get the common options
