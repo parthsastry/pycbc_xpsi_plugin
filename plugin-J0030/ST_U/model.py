@@ -6,8 +6,8 @@ import xpsi
 # from xpsi.Parameter import Derive
 from xpsi.global_imports import gravradius
 
-from .utils import (CustomInstrument, CustomSignal, CustomInterstellar,
-                    CustomPhotosphere)
+from utils import (CustomInstrument, CustomSignal, CustomInterstellar,
+                   CustomPhotosphere)
 
 # from pycbc.workflow import WorkflowConfigParser
 from pycbc.inference.models import BaseModel
@@ -28,8 +28,6 @@ class XPSIModel(BaseModel):
     # Comment - Currently testing out a NICER only likelihood
     # evaluation, hence these parameter names aren't used. In fact,
     # there is no parameter names list in the main run script at all.
-    # Curious - need to confirm if this is a caveat of the implementation of
-    # the MCMC sampler or something else. (WHY NO NAME LIST?)
 
     def __init__(self, variable_params, star, signals, num_energies, **kwargs):
         super().__init__(variable_params, **kwargs)
@@ -49,18 +47,21 @@ class XPSIModel(BaseModel):
 
     def _loglikelihood(self):
         # map the current parameters to the ordered list
-        # params = self.current_params
+        params = self.current_params
         # update the underlying likelihood. Don't need for now, no param
         # aliases.
-        """for p in self._xpsi_likelihood.names:
-            self._xpsi_likelihood[p] = params[self.param_aliases[p]]
-        """
+        for p in self._xpsi_likelihood.names:
+            # Will need to change param names to aliases if doing a NICERxXMM
+            # analysis.
+            self._xpsi_likelihood[p] = params[p]
+
         # check addtional constraints
         if not self.apply_additional_constraints():
             return -numpy.inf
         logl = self._xpsi_likelihood()
-        # FIXME: for some reason, this occasionally returns arrays of len 1
-        # if so, force to float
+        # FIXME: Usually the likelihood call returns an array of len 1
+        # Need to force to float, if that's the case. Can maybe do it
+        # in one line?
         if isinstance(logl, numpy.ndarray):
             logl = logl.item()
         return logl
@@ -69,6 +70,11 @@ class XPSIModel(BaseModel):
         # FIXME: these should really be applied in the prior, but hard to
         # do right now because of the special functions involved, so we'll
         # just apply them in the likelihood call
+
+        # Potentially add the function constraints directly hardcoded into
+        # functions in the prior after getting them from the modules called
+        # here.
+
         # Following copied from ST_U/CustomPrior.py
         spacetime = self.star.spacetime
 
@@ -103,28 +109,31 @@ class XPSIModel(BaseModel):
         section = 'model'
         instruments = shlex.split(cp.get(section, 'instruments'))
         num_energies = int(cp.get(section, 'num-energies'))
-        # get alpha/beta (QUESTION - WHY RENAMED for nicer vs nicerxXMM?) value
-        # FIXME: Put this in prior. For now, to test out likelihood, use
-        # Collin's old config file, so keep as is.
 
         # NOTE - for NICER only, parameter name is actually beta, not alpha.
         section = 'model'
 
         # NOTE - Current CustomInstrument implementation sets bounds on beta
-        # directly in the from_SWG function. Hence, no need for bounds to be
-        # supplied. CHECK IF INTENDED! WILL PROBABLY HAVE TO CHANGE FOR
-        # NICERxXMM
+        # directly in the from_SWG function. Also, the prior on beta is set
+        # via a custom function imported from the distributions module
 
-        # min_alpha = float(cp.get(section, 'min-alpha'))
-        # max_alpha = float(cp.get(section, 'max-alpha'))
-        # alpha_bounds = (min_alpha, max_alpha)
-        # load the instruments
+        # NOTE - There are going to be issues with the implementation of the 
+        # distribution for beta via the custom functions. This is because the
+        # functions will have to have hardcoded values for the parameters for
+        # the alpha and D distributions. This is not ideal, and we'll have
+        # to tinker with pycbc's custom prior implementation to allow
+        # us to pass parameters to custom functions via the config file.
+
         # NOTE - Current implementation only supports loading NICER. Look at
-        # Collin's old repo for implementation to load XMM instruments.
+        # Collin's old repo for implementation to load XMM instruments. Not
+        # super complicated. Need to load the instrument parameters and then
+        # append to signals.
+
+        interstellar = interstellar_from_config(cp)
         signals = []
         nicer = None
         if 'nicer' in instruments:
-            nicer = nicer_from_config(cp)
+            nicer = nicer_from_config(cp, interstellar)
             signals.append(nicer.signal)
         # load the spacetime
         spacetime = spacetime_from_config(cp)
@@ -157,10 +166,11 @@ class Instrument:
 def interstellar_from_config(cp):
     section = 'interstellar'
     attenuation_path = cp.get(section, 'attenuation-path')
-    # NOTE - should this be drawn from prior as well?
+    # QUESTION - should this be drawn from prior as well?
     # OVERARCHING QUESTION -
     # Why are these classes initialized with the bounds on these parameters
     # in the first place? Shouldn't the bounds be drawn from the prior?
+    # Something to ask Serena down the line.
     column_density = (float(cp.get(section, 'min-column-density')),
                       float(cp.get(section, 'max-column-density')))
     interstellar = CustomInterstellar.from_SWG(
@@ -185,7 +195,7 @@ def signal_from_config(cp, data, instrument, interstellar, **kwargs):
     return signal
 
 
-def nicer_from_config(cp):
+def nicer_from_config(cp, interstellar):
     section = 'nicer'
     # NOTE - changes in how this is initialised, will require changes in
     # Collin's old config file as well.
@@ -226,8 +236,6 @@ def nicer_from_config(cp):
                                            max_input=max_input,
                                            min_input=min_input,
                                            channel_edges=channel_edges)
-    # load the interstellar medium
-    interstellar = interstellar_from_config(cp)
     # load the signal
     signal = signal_from_config(cp, data, instrument, interstellar)
     return Instrument(data, instrument, signal)
@@ -237,17 +245,19 @@ def spacetime_from_config(cp):
     # setup the spacetime
     section = 'spacetime'
     # FIXME: these should be pulled from the prior
-    # NOTE - bounds different in main script. Check if we should bound
-    # stuff here or not.
+    # Something to fix later. Should be relatively straightforward
+    # to pull stuff from the prior config and initialize the bounds
+    # like that. Need to check if that breaks anything.
     spacetime_bounds = {
         'mass': (1.0, 3.0),
         'radius': (3.0*gravradius(1.0), 16.0),
         'cos_inclination': (0.0, 1.0),
     }
     spacetime_freq = float(cp.get(section, 'frequency'))
-    return xpsi.Spacetime(spacetime_bounds,
-                          dict(frequency=spacetime_freq,
-                               distance=0.01))  # Fixed dummy distance param
+    return xpsi.Spacetime(bounds=spacetime_bounds,
+                          values=dict(frequency=spacetime_freq,
+                                      distance=0.01))
+    # Fixed dummy distance param
 
 
 def read_hotspot_args(cp, section, common=None):
@@ -285,17 +295,21 @@ def hotregions_from_config(cp):
     section = 'hotspots'
     spottags = cp.get_subsections(section)
     # FIXME: these should come from the prior
-    # NEED TO PULL HOTREGION PRIORS FROM PRIOR
+    # Something to fix later. Should be relatively straightforward
+    # to pull stuff from the prior config and initialize the bounds
+    # like that. Need to check if that breaks anything.
     hotspots_bounds = {
         'p': dict(
             super_colatitude=(0.001, numpy.pi-0.001),
             super_radius=(0.001, numpy.pi/2.0 - 0.001),
-            phase_shift=(-0.25, 0.75),  # NOTE - changed from -0.5, 0.5. why?
+            # QUESTION - changed from -0.5, 0.5. why?
+            phase_shift=(-0.25, 0.75),
             super_temperature=(5.1, 6.8)),
         's': dict(
             super_colatitude=(0.001, numpy.pi - 0.001),
             super_radius=(0.001, numpy.pi/2.0 - 0.001),
-            phase_shift=(-0.5, 0.5),
+            # QUESTION - changed from -0.5, 0.5. why?
+            phase_shift=(-0.25, 0.75),
             super_temperature=(5.1, 6.8)
         )
     }
