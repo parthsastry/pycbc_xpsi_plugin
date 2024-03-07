@@ -15,7 +15,7 @@ from pycbc.inference.models import BaseModel
 
 class XPSIModel(BaseModel):
     """Model wrapper around XPSI likelihood function."""
-    name = 'xpsi'
+    name = 'pycbc_xpsi'
 
     # we need to alias some of the parameter names to be compliant with
     # pycbc config file sections
