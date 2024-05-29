@@ -64,6 +64,7 @@ class XPSI_STUModel(BaseModel):
         # in one line?
         if isinstance(logl, numpy.ndarray):
             logl = logl.item()
+        print(logl)
         return logl
 
     def apply_additional_constraints(self):

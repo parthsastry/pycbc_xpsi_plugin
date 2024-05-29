@@ -35,7 +35,4 @@ def _logpdf_beta(beta=None):
 # Finicky. Need to test this.
 def _cdfinv_beta(**kwargs):
     """ Inverse of the cumulative distribution function for beta. """
-    try:
-        return {param: _beta_invcdf(value) for param, value in kwargs.items()}
-    except:
-        print("Error in beta.py: _cdfinv_beta")
+    return {param: _beta_invcdf(value) for param, value in kwargs.items()}
