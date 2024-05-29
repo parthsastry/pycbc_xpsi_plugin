@@ -6,16 +6,16 @@ import xpsi
 # from xpsi.Parameter import Derive
 from xpsi.global_imports import gravradius
 
-from .utils import (CustomInstrument, CustomSignal, CustomInterstellar,
-                    CustomPhotosphere)
+from utils import (CustomInstrument, CustomSignal, CustomInterstellar,
+                   CustomPhotosphere)
 
 # from pycbc.workflow import WorkflowConfigParser
 from pycbc.inference.models import BaseModel
 
 
-class XPSIModel(BaseModel):
+class XPSI_STUModel(BaseModel):
     """Model wrapper around XPSI likelihood function."""
-    name = 'pycbc_xpsi'
+    name = 'pycbc_xpsi_stu'
 
     # we need to alias some of the parameter names to be compliant with
     # pycbc config file sections

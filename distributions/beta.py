@@ -27,13 +27,15 @@ _beta_invcdf = Akima1DInterpolator(_beta_cdf, _ordered_beta)
 _beta_invcdf.extrapolate = True
 
 
-def _logpdf_beta(**kwargs):
+def _logpdf_beta(beta=None):
     """ Logarithm of the probability density function for beta. """
-    beta_list = kwargs['beta']
-    return np.log(_beta_pdf(beta_list))
+    return np.log(_beta_pdf(beta))
 
 
+# Finicky. Need to test this.
 def _cdfinv_beta(**kwargs):
     """ Inverse of the cumulative distribution function for beta. """
-    quantile_list = kwargs['beta']
-    return {'beta': _beta_invcdf(quantile_list)}
+    try:
+        return {param: _beta_invcdf(value) for param, value in kwargs.items()}
+    except:
+        print("Error in beta.py: _cdfinv_beta")

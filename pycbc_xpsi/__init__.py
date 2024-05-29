@@ -1,1 +1,1 @@
-from .plugin_J0030 import XPSIModel
+from STUmodel import XPSI_STUModel
