@@ -6,8 +6,8 @@ import xpsi
 # from xpsi.Parameter import Derive
 from xpsi.global_imports import gravradius
 
-from utils import (CustomInstrument, CustomSignal, CustomInterstellar,
-                   CustomPhotosphere)
+from .utils import (CustomInstrument, CustomSignal, CustomInterstellar,
+                    CustomPhotosphere)
 
 # from pycbc.workflow import WorkflowConfigParser
 from pycbc.inference.models import BaseModel
