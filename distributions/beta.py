@@ -26,16 +26,26 @@ _beta_pdf = gaussian_kde(_ordered_beta, bw_method=0.098325)
 _beta_invcdf = Akima1DInterpolator(_beta_cdf, _ordered_beta)
 _beta_invcdf.extrapolate = True
 
-# NOTE - have to check whether importing param names from the distribution
+# FIXME - have to check whether importing param names from the distribution
 # that imports this module is possible. If not, will have to hardcode
 # the param names here. (as done in _cdfinv_beta)
 
+# NOTE - __call__ on gaussian_kde forces input into arrays, even when
+# a single point is passed. The return value is also an array of size
+# (# of points, 1).
+# This is fine for when we evaluate the logpdf for multiple points, however
+# when returning the logprior for a single point when initializing the
+# NestedSampler, pycbc expects a float return value that is then forced into a
+# numpy array (when combined with other logpriors from different distributions)
+# Hence the if statement.
 
-def _logpdf_beta(**kwargs):
+
+def _logpdf_beta(beta=None, **kwargs):
     """ Logarithm of the probability density function for beta. """
-    params = ['beta']
-    for param in params:
-        return np.log(_beta_pdf(kwargs[param]))
+    pdf = _beta_pdf(beta)
+    if pdf.size == 1:
+        return np.log(pdf[0])
+    return np.log(pdf)
 
 
 # Finicky. Need to test this.
