@@ -31,9 +31,11 @@ _beta_invcdf.extrapolate = True
 # the param names here. (as done in _cdfinv_beta)
 
 
-def _logpdf_beta(beta=None):
+def _logpdf_beta(**kwargs):
     """ Logarithm of the probability density function for beta. """
-    return np.log(_beta_pdf(beta))
+    params = ['beta']
+    for param in params:
+        return np.log(_beta_pdf(kwargs[param]))
 
 
 # Finicky. Need to test this.
