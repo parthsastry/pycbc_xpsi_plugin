@@ -26,6 +26,10 @@ _beta_pdf = gaussian_kde(_ordered_beta, bw_method=0.098325)
 _beta_invcdf = Akima1DInterpolator(_beta_cdf, _ordered_beta)
 _beta_invcdf.extrapolate = True
 
+# NOTE - have to check whether importing param names from the distribution
+# that imports this module is possible. If not, will have to hardcode
+# the param names here. (as done in _cdfinv_beta)
+
 
 def _logpdf_beta(beta=None):
     """ Logarithm of the probability density function for beta. """
@@ -35,4 +39,8 @@ def _logpdf_beta(beta=None):
 # Finicky. Need to test this.
 def _cdfinv_beta(**kwargs):
     """ Inverse of the cumulative distribution function for beta. """
-    return {param: _beta_invcdf(value) for param, value in kwargs.items()}
+    updated = {}
+    params = ['beta']
+    for param in params:
+        updated[param] = _beta_invcdf(kwargs[param])
+    return updated

@@ -64,7 +64,6 @@ class XPSI_STUModel(BaseModel):
         # in one line?
         if isinstance(logl, numpy.ndarray):
             logl = logl.item()
-        print(logl)
         return logl
 
     def apply_additional_constraints(self):
@@ -118,7 +117,7 @@ class XPSI_STUModel(BaseModel):
         # directly in the from_SWG function. Also, the prior on beta is set
         # via a custom function imported from the distributions module
 
-        # NOTE - There are going to be issues with the implementation of the 
+        # NOTE - There are going to be issues with the implementation of the
         # distribution for beta via the custom functions. This is because the
         # functions will have to have hardcoded values for the parameters for
         # the alpha and D distributions. This is not ideal, and we'll have

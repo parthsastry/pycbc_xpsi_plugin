@@ -3,6 +3,8 @@
 """Utilities for setting up NICER and XMM Newtwon analysis.
 
 FIXME: these settings are specific to the STU model with J0030
+NOTE - need to check what changes need to be made for utils to be
+a broad module for all models.
 """
 
 import numpy as np
@@ -214,7 +216,7 @@ class CustomInterstellar(xpsi.Interstellar):
     @classmethod
     def from_SWG(cls, path, **kwargs):
         """ Load attenuation file from the NICER SWG. """
-    
+
         temp = np.loadtxt(path, dtype=np.double)
 
         energies = temp[:, 0]
@@ -261,7 +263,7 @@ class CustomPhotosphere(xpsi.Photosphere):
             for j in range(reorder_buf.shape[1]):
                 for k in range(reorder_buf.shape[2]):
                     for l in range(reorder_buf.shape[3]):
-                        buf[bufdex] = reorder_buf[i, j, k , l]
+                        buf[bufdex] = reorder_buf[i, j, k, l]
                         bufdex += 1
 
         self._hot_atmosphere = (logT, logg, mu, logE, buf)
