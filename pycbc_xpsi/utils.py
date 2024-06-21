@@ -26,6 +26,7 @@ from xpsi.likelihoods.default_background_marginalisation import precomputation
 #   which was downloaded from https://zenodo.org/records/8239000
 #
 
+
 class CustomInstrument(xpsi.Instrument):
     """ Methods and attributes specific to the NICER instrument.
 

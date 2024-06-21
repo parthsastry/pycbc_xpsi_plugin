@@ -324,6 +324,7 @@ def hotregions_from_config(cp):
         spots.append(xpsi.HotRegion(bounds=bnds,
                                     values={},
                                     prefix=tag,
+                                    atm_ext="Num4D",
                                     **spotopts))
     return xpsi.HotRegions(tuple(spots))
 
