@@ -253,9 +253,9 @@ def spacetime_from_config(cp):
         'radius': (3.0*gravradius(1.0), 16.0),
         'cos_inclination': (0.0, 1.0),
     }
-    spacetime_freq = float(cp.get(section, 'frequency'))
+    spacetime_invfreq = float(cp.get(section, 'inv_frequency'))
     return xpsi.Spacetime(bounds=spacetime_bounds,
-                          values=dict(frequency=spacetime_freq,
+                          values=dict(frequency=1.0/spacetime_invfreq,
                                       distance=0.01))
     # Fixed dummy distance param
 
