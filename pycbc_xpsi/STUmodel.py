@@ -130,11 +130,13 @@ class XPSI_STUModel(BaseModel):
         # append to signals.
 
         interstellar = interstellar_from_config(cp)
-        signals = []
+        signals = [[],]
         nicer = None
         if 'nicer' in instruments:
             nicer = nicer_from_config(cp, interstellar)
-            signals.append(nicer.signal)
+            signals[0].append(nicer.signal)
+        if 'xmm' in instruments:
+            raise NotImplementedError("XMM not supported yet.")
         # load the spacetime
         spacetime = spacetime_from_config(cp)
         # load the hotregions
@@ -143,7 +145,7 @@ class XPSI_STUModel(BaseModel):
         star = xpsi.Star(spacetime=spacetime,
                          photospheres=photosphere)
         args['star'] = star
-        args['signals'] = [signals]
+        args['signals'] = signals
         args['num_energies'] = num_energies
         args.update(kwargs)
         return cls(**args)
