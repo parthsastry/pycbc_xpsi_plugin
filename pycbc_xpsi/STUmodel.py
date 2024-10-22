@@ -111,7 +111,6 @@ class XPSI_STUModel(BaseModel):
         num_energies = int(cp.get(section, 'num-energies'))
 
         # NOTE - for NICER only, parameter name is actually beta, not alpha.
-        section = 'model'
 
         # NOTE - Current CustomInstrument implementation sets bounds on beta
         # directly in the from_SWG function. Also, the prior on beta is set
@@ -123,11 +122,6 @@ class XPSI_STUModel(BaseModel):
         # the alpha and D distributions. This is not ideal, and we'll have
         # to tinker with pycbc's custom prior implementation to allow
         # us to pass parameters to custom functions via the config file.
-
-        # NOTE - Current implementation only supports loading NICER. Look at
-        # Collin's old repo for implementation to load XMM instruments. Not
-        # super complicated. Need to load the instrument parameters and then
-        # append to signals.
 
         interstellar = interstellar_from_config(cp)
         signals = [[],]
@@ -191,7 +185,7 @@ def signal_from_config(cp, data, instrument, interstellar, **kwargs):
         data=data,
         instrument=instrument,
         interstellar=interstellar,
-        cache=False,
+        cache=True,
         workspace_intervals=workspace_intervals,
         epsrel=epsrel, epsilon=epsilon, sigmas=sigmas, **kwargs)
     return signal
